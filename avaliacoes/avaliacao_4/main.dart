@@ -26,34 +26,39 @@ void main() async {
 }
 
 void _handleClient(Socket client) {
-  final stream = client
+  client
+      // 🔥 CORREÇÃO PRINCIPAL (resolve erro de tipo)
+      .cast<List<int>>()
       .transform(utf8.decoder)
       .transform(const LineSplitter())
       .where((linha) => linha.trim().isNotEmpty)
       .listen(
         (linha) => _processarTemperatura(client, linha),
+        onError: (e) {
+          print('❌ Erro no stream: $e');
+        },
         onDone: () {
           print('🔌 IoT desconectado');
           client.destroy();
         },
+        cancelOnError: true,
       );
-
-  client.done.then((_) => stream.cancel());
 }
 
 void _processarTemperatura(Socket client, String linha) {
   try {
     final dados = jsonDecode(linha);
-    final temp = dados['temperatura']?.toDouble() ?? 0.0;
-    final timestamp = dados['timestamp'];
+
+    final temp = (dados['temperatura'] as num?)?.toDouble() ?? 0.0;
+    final timestamp = dados['timestamp'] ?? 'sem timestamp';
 
     print('''
 🌡️  SENSOR: ${temp.toStringAsFixed(1)}°C
-   ⏰  ${timestamp}
+   ⏰  $timestamp
    📡 ${client.remoteAddress.address}
 ${'─' * 40}''');
   } catch (e) {
-    print('❌ Erro JSON: $linha');
+    print('❌ Erro JSON recebido: $linha');
   }
 }
 
@@ -62,22 +67,33 @@ Future<void> _iniciarDispositivoIoT() async {
   Timer? timer;
 
   try {
-  
     socket = await Socket.connect('127.0.0.1', 8080);
     print('✅ IoT conectado ao servidor!');
 
-  
-    timer = Timer.periodic(Duration(seconds: 10), (t) {
+    // envia imediatamente
+    _enviarTemperatura(socket);
+
+    timer = Timer.periodic(Duration(seconds: 10), (_) {
       _enviarTemperatura(socket!);
     });
 
- 
-    socket!.listen(
-      (data) => print('📨 Resposta: ${utf8.decode(data)}'),
+    socket.listen(
+      (data) {
+        try {
+          print('📨 Resposta: ${utf8.decode(data)}');
+        } catch (_) {
+          print('📨 Resposta (bytes): $data');
+        }
+      },
       onDone: () {
         print('🔌 Servidor desconectado');
         timer?.cancel();
       },
+      onError: (e) {
+        print('❌ Erro no cliente: $e');
+        timer?.cancel();
+      },
+      cancelOnError: true,
     );
   } catch (e) {
     print('❌ Erro IoT: $e');
@@ -87,6 +103,7 @@ Future<void> _iniciarDispositivoIoT() async {
 void _enviarTemperatura(Socket socket) {
   try {
     final temperatura = 15 + Random().nextDouble() * 20;
+
     final dados = {
       'temperatura': temperatura,
       'timestamp': DateTime.now().toIso8601String(),
@@ -94,7 +111,10 @@ void _enviarTemperatura(Socket socket) {
     };
 
     final mensagem = jsonEncode(dados) + '\n';
-    socket.write(mensagem);
+
+    // ✅ envio correto
+    socket.add(utf8.encode(mensagem));
+
     print('📤 IoT → Servidor: ${temperatura.toStringAsFixed(1)}°C');
   } catch (e) {
     print('❌ Erro envio: $e');
