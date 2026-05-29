@@ -1,0 +1,35 @@
+name: github_client
+description: "A new Flutter project"
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+
+  http: ^1.6.0
+  oauth2: ^2.0.5
+  url_launcher: ^6.3.2
+  github: ^9.25.1
+  window_to_front: ^0.0.3
+
+  gql: ^1.0.0
+  gql_http_link: ^1.1.0
+  fluttericon: ^2.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  build_runner: ^2.4.15
+
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
