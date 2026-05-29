@@ -2,10 +2,10 @@
 // Agregação e Composição
 import 'dart:convert';
 
-class Dependente {
+class dependente {
   late String _nome;
 
-  Dependente(String nome) {
+  dependente(String nome) {
     this._nome = nome;
   }
 
@@ -16,11 +16,11 @@ class Dependente {
   }
 }
 
-class Funcionario {
+class funcionario {
   late String _nome;
-  late List<Dependente> _dependentes;
+  late List<dependente> _dependentes;
 
-  Funcionario(String nome, List<Dependente> dependentes) {
+  funcionario(String nome, List<dependente> dependentes) {
     this._nome = nome;
     this._dependentes = dependentes;
   }
@@ -33,11 +33,11 @@ class Funcionario {
   }
 }
 
-class EquipeProjeto {
+class equipeProjeto {
   late String _nomeProjeto;
   late List<Funcionario> _funcionarios;
 
-  EquipeProjeto(String nomeprojeto, List<Funcionario> funcionarios) {
+  equipeProjeto(String nomeprojeto, List<funcionario> funcionarios) {
     _nomeProjeto = nomeprojeto;
     _funcionarios = funcionarios;
   }
@@ -51,14 +51,14 @@ class EquipeProjeto {
 }
 
 void main() {
-  var dep1 = Dependente("Alan");
-  var dep2 = Dependente("Celso");
-  var dep3 = Dependente("João");
+  var dep1 = dependente("Alan");
+  var dep2 = dependente("Celso");
+  var dep3 = dependente("João");
 
-  var func1 = Funcionario("Laylson", [dep1, dep2]);
-  var func2 = Funcionario("Eduarda", [dep3]);
+  var func1 = funcionario("Laylson", [dep1, dep2]);
+  var func2 = funcionario("Eduarda", [dep3]);
   var funcionarios = [func1, func2];
-  var equipe = EquipeProjeto("Sistema de Vendas", funcionarios);
+  var equipe = equipeProjeto("Sistema de Vendas", funcionarios);
 
   print(jsonEncode(equipe.toJson()));
 }
